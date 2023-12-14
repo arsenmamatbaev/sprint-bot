@@ -4,7 +4,7 @@ import logging
 from dotenv.main import load_dotenv
 #--------- aiogram ---------#
 from aiogram import Bot, Dispatcher
-from aiogram.filters import CommandStart
+from aiogram.filters import CommandStart, Command, StateFilter
 #--------- Database ---------#
 import database
 from database import Connection
@@ -12,9 +12,15 @@ from database import Connection
 from core.middlewares.dbmiddleware import DbMiddleware
 from core.middlewares.apschmiddleware import SchedulerMiddleware
 from core.middlewares.prdmiddleware import ProdamusMiddleware
+#--------- Filters ---------#
+from core.filters.IsAdmin import IsAdmin
 #--------- Handlers ---------#
 from core.handlers.users.bot_start import start
+
+from core.handlers.admins.admin_start import start_admin
+from core.handlers.admins.adminMenu import main_menu_handler, add_admin, choose_user_handler
 #--------- Others ---------#
+from States import AdminsStates, UsersStates
 from prodamus import Prodamus
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler_di import ContextSchedulerDecorator
@@ -57,6 +63,11 @@ async def main():
     #--------- Handlers ---------#
     dp.message.register(start, CommandStart())
 
+    #--------- Admin's Handlers ---------#
+    dp.message.register(start_admin, Command(commands=['admin']), IsAdmin())
+    dp.callback_query.register(main_menu_handler, StateFilter(AdminsStates.main_menu))
+    dp.callback_query.register(add_admin, StateFilter(AdminsStates.admin_settings_menu))
+    dp.message.register(choose_user_handler, StateFilter(AdminsStates.choose_user_menu))
     #--------- Others ---------#
     dp.startup.register(on_startup)
 

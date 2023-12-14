@@ -1,6 +1,6 @@
 import asyncpg
 import logging
-from typing import Union
+from typing import Union, List
 import pytz
 from datetime import datetime, timedelta
 from .UserObject import User, DataUser, PaymentData
@@ -41,9 +41,7 @@ class Connection:
         await self.__conn.execute(table_settings)
         table_admins = ("CREATE TABLE IF NOT EXISTS admins("
                         "id SERIAL PRIMARY KEY,"
-                        "user_id BIGINT UNIQUE NOT NULL,"
-                        "full_name VARCHAR(250),"
-                        "username VARCHAR(50));")
+                        "user_id BIGINT UNIQUE NOT NULL);")
         await self.__conn.execute(table_admins)
         logging.info('Создание таблиц --> Succes')
 
@@ -91,4 +89,24 @@ class Connection:
             price2=data['price2'],
             expire=data['expire']
         )
+    
+    @property
+    async def getAdmins(self) -> List[int]:
+        query = ("SELECT * FROM admins;")
+        admins = await self.__conn.fetch(query)
+        returnData = []
+        for admin in admins:
+            returnData.append(admin['user_id'])
+        return returnData
+
+    async def addAdmin(self,
+                       user_id: int) -> None:
+        '''
+        Добавляет админа в базу
+        :return: True если админ уже есть в базе
+        '''
+        query = ("INSERT INTO admins (user_id) "
+                 f"VALUES ({user_id}) "
+                 f"ON CONFLICT (user_id) DO UPDATE SET user_id = {user_id};")
+        await self.__conn.execute(query)
 

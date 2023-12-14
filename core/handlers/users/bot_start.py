@@ -4,8 +4,10 @@ from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
 from database import Connection, User, Levels
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from prodamus import Prodamus
-from messages.users import start_payment_message_1, start_payment_message_2
+from messages.users import start_payment_message_1, start_payment_message_2, start_message
 from ...notifications.paymentNotify import newPrice
+from ...keyboards.users.inline import get_guide
+import Files
 
 tz = pytz.timezone('Europe/Moscow')
 
@@ -18,6 +20,10 @@ async def start(message: Message,
                 username=message.from_user.username)
     exist = await db.get_user(user)
     prices = await db.getPaymentData
+    await message.answer_document(Files.presentation_besplatnik,
+                                  caption='Структура бесплатника')
+    await message.answer(start_message,
+                         reply_markup=get_guide)
     if not exist:
         payment_link = await prodamus.createLink(user,
                                                  db)
@@ -48,5 +54,5 @@ async def start(message: Message,
         payment_keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Оплатить✅',
                                                                                        url=exist.payment_link)]])
         await message.answer(start_payment_message_2.format(price2=prices.price2),
-                                                            reply_markup=payment_keyboard)        
+                                                            reply_markup=payment_keyboard)   
 

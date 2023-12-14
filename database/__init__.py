@@ -2,6 +2,7 @@ import logging
 import asyncpg
 from .connection import Connection
 from .UserObject import User
+from .levels import Levels
 
 
 async def connect(host: str = '127.0.0.1',

@@ -47,8 +47,8 @@ class Connection:
         await self.__conn.execute(table_admins)
         logging.info('Создание таблиц --> Succes')
 
-    async def userExist(self,
-                        user: User) -> Union[DataUser, bool]:
+    async def get_user(self,
+                       user: User) -> Union[DataUser, bool]:
         '''
         Проверяет наличие пользователя в базе данных
         '''
@@ -61,20 +61,25 @@ class Connection:
             full_name=user.full_name,
             username=user.username,
             payment_link=ExistUser[0]['payment_link'],
-            level=ExistUser['level']
+            level=ExistUser[0]['level']
         )
     
-    async def create_or_update(self,
-                               user: User,
-                               payment_link) -> None:
+    async def create(self,
+                     user: User,
+                     payment_link) -> None:
         '''
         Создает/обновляет пользователя в базе данных
         '''
         now_date = datetime.now(tz=tz).strftime('%Y-%m-%d %H:%M')
         query = ("INSERT INTO users (user_id, full_name, username, payment_link, register_date) "
-                 f"VALUES ({user.user_id}, '{user.full_name}', '{user.username}', '{payment_link.payment_link}', '{now_date}') "
-                 f"ON CONFLICT (user_id) DO UPDATE SET updated_at = '{now_date}', payment_link = '{payment_link.payment_link}'")
+                 f"VALUES ({user.user_id}, '{user.full_name}', '{user.username}', '{payment_link.payment_link}', '{now_date}');")
         await self.__conn.execute(query)
+
+    async def updateLink(self,
+                         user: User,
+                         payment_link):
+        query = (f"UPDATE users SET payment_link = '{payment_link.payment_link}', level = '{Levels.payment_2}' WHERE user_id = {user.user_id};")
+        await self.__conn.execute(query=query)
 
     @property
     async def getPaymentData(self) -> PaymentData:

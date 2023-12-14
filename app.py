@@ -7,6 +7,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 #--------- Database ---------#
 import database
+from database import Connection
 #------- Middlewares --------#
 from core.middlewares.dbmiddleware import DbMiddleware
 from core.middlewares.apschmiddleware import SchedulerMiddleware
@@ -21,7 +22,6 @@ from apscheduler_di import ContextSchedulerDecorator
 load_dotenv()
 
 main_event_loop = asyncio.new_event_loop()
-scheduler_event_loop = asyncio.new_event_loop()
 
 db_config = {
     'host': os.getenv('DB_HOST'),
@@ -35,14 +35,20 @@ bot = Bot(os.getenv('API_KEY'),
           parse_mode='html')
 dp = Dispatcher()
 
-scheduler = ContextSchedulerDecorator(AsyncIOScheduler(event_loop=scheduler_event_loop))
+scheduler = ContextSchedulerDecorator(AsyncIOScheduler())
+scheduler.ctx.add_instance(instance=bot, 
+                           declared_class=Bot)
+scheduler.ctx.add_instance(instance=prodamus,
+                           declared_class=Prodamus)
 
 async def on_startup():
     logging.basicConfig(level=logging.INFO)
-    scheduler.start()
     connection = await database.connect(**db_config)
     await connection.create_tables()
     dp.update.middleware.register(DbMiddleware(connection=connection))  # Мидлварь базы данных
+    scheduler.ctx.add_instance(instance=connection,
+                               declared_class=Connection)
+    scheduler.start()
 
 async def main():
     #------- Middlewares --------#

@@ -52,3 +52,12 @@ async def choose_user_handler(message: Message,
 
 # ----------------------------------------------------
 
+
+
+async def toManiMenuHandler(call: CallbackQuery,
+                            state: FSMContext):
+    await call.message.delete()
+    await call.message.answer(first_message,
+                              reply_markup=admin_menu)
+    await state.set_state(AdminsStates.main_menu)
+

@@ -56,6 +56,12 @@ admins_settings_keyboard = InlineKeyboardMarkup(
                 text='🗑Удалить админа',
                 callback_data='admin_delete'
             )
+        ],
+        [
+            InlineKeyboardButton(
+                text='🔙В меню',
+                callback_data='toMenu'
+            )
         ]
     ]
 )

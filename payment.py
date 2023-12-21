@@ -8,6 +8,7 @@ from core.keyboards.users.inline import anketa_mentorstvo_keyboard, get_keyboard
 from messages import users as msg
 from messages.admins import payment_message
 import Files 
+import asyncio
 
 
 app = Flask(__name__)
@@ -17,16 +18,18 @@ load_dotenv()
 
 bot = Bot(os.getenv('API_KEY'),
           protect_content=True)
-dp = Dispatcher()
+event_loop = asyncio.get_event_loop()
 
 
-async def SendFirstLesson(message: Message):
-    #await bot.send_message(chat_id=os.getenv('ADMIN_CHAT'),
-    #                       text=payment_message.format(user_id=user_id,
-    #                                                   phone_number=phone,
-    #                                                   email=email,
-    #                                                  sum=sum))
-    user_id = message.from_user.id
+async def SendFirstLesson(user_id: int,
+                          phone: str,
+                          email: str,
+                          sum: str):
+    await bot.send_message(chat_id=os.getenv('ADMIN_CHAT'),
+                           text=payment_message.format(user_id=user_id,
+                                                       phone_number=phone,
+                                                       email=email,
+                                                       sum=sum))
     await bot.send_video(chat_id=user_id,
                          video=Files.lesson_1,
                          caption=msg.lesson_1_caption)
@@ -41,15 +44,16 @@ async def SendFirstLesson(message: Message):
 
 
 @app.route('/payment')
-async def newPayment():
+def newPayment():
     data = request.values.to_dict()
-    if data['payment_status'] == 'succes':
+    if data['payment_status'] == 'success':
         try:
-            await SendFirstLesson(user_id=int(data['order_id']),
-                                  phone=data['customer_phone'],
-                                  email=data['customer_email'],
-                                  sum=data['payment_sum'])
-        except:
+            event_loop.run_until_complete(SendFirstLesson(user_id=int(data['order_id']),
+                                                          phone=data['customer_phone'],
+                                                          email=data['customer_email'],
+                                                          sum=data['payment_sum']))
+        except Exception as e:
+            print(e)
             return Response('Возникла какая-то ошибка в процессе обработки платежа',
                             status=405)
     else:

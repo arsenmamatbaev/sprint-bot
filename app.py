@@ -17,15 +17,16 @@ from aiogram import F
 from core.filters.IsAdmin import IsAdmin
 #--------- Handlers ---------#
 from core.handlers.users.bot_start import start
-from core.handlers.users.lesson_2 import SecondLesson2
+from core.handlers.users.lesson_2 import SecondLesson2, SecondLesson2Next
 from core.handlers.users.lesson_3 import SendLesson3
-from core.handlers.users.lesson_4 import SendLesson4
+from core.handlers.users.lesson_4 import SendLesson4, bonuses4lesson
 
 from payment import SendFirstLesson
 
 
 from core.handlers.admins.admin_start import start_admin
-from core.handlers.admins.adminMenu import main_menu_handler, add_admin, choose_user_handler, toManiMenuHandler
+from core.handlers.admins.adminMenu import toManiMenuHandler, getUserListExcel
+from core.handlers.admins.adminMenu import editPricesHandler, newPricesEdit, mailing_file, mailing_text, doMailing
 #--------- Others ---------#
 from States import AdminsStates, UsersStates
 from prodamus import Prodamus
@@ -74,13 +75,20 @@ async def main():
     dp.callback_query.register(SecondLesson2, F.data == 'get_request')
     dp.callback_query.register(SendLesson3, F.data == 'zabrat')
     dp.callback_query.register(SendLesson4, F.data == 'toFourthLesson')
+    dp.callback_query.register(SecondLesson2Next, F.data == 'sendLessonSecond')
+    dp.callback_query.register(bonuses4lesson, F.data == 'getBonuses4')
+    dp.callback_query.register(doMailing, F.data == 'mailing')
+    dp.message.register(mailing_file, StateFilter(AdminsStates.mailing_file_state))
+    dp.message.register(mailing_text, StateFilter(AdminsStates.mailing_text_state))
 
     #--------- Admin's Handlers ---------#
-    dp.callback_query.register(toManiMenuHandler, F.data == 'toMenu')
     dp.message.register(start_admin, Command(commands=['admin']), IsAdmin())
-    dp.callback_query.register(main_menu_handler, StateFilter(AdminsStates.main_menu))
-    dp.callback_query.register(add_admin, StateFilter(AdminsStates.admin_settings_menu))
-    dp.message.register(choose_user_handler, StateFilter(AdminsStates.choose_user_menu))
+    dp.callback_query.register(toManiMenuHandler, F.data == 'cancel')
+    dp.callback_query.register(toManiMenuHandler, F.data == 'toMenu')
+    dp.callback_query.register(getUserListExcel, F.data == 'user_list')
+    dp.callback_query.register(editPricesHandler, F.data == 'edit_price')
+    dp.message.register(newPricesEdit, StateFilter(AdminsStates.editPrice))
+
     #--------- Others ---------#
     dp.startup.register(on_startup)
 

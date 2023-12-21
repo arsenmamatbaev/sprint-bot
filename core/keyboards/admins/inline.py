@@ -5,62 +5,20 @@ admin_menu = InlineKeyboardMarkup(
     inline_keyboard=[
         [
             InlineKeyboardButton(
-                text='⚙️Управление оплатой',
-                callback_data='payment_settings'
+                    text='Изменить цены',
+                    callback_data='edit_price'
             )
         ],
         [
             InlineKeyboardButton(
-                text='💻Управление админами',
-                callback_data='admin_settings'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='🗂Управление пользователями',
-                callback_data='user_settings'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='📬Рассылки',
+                text='📬Рассылка',
                 callback_data='mailing'
             )
-        ],
-        [
-            InlineKeyboardButton(
-                text='💎Провести акцию',
-                callback_data='diskount'
-            )
-        ],        
+        ],      
         [
             InlineKeyboardButton(
                 text='📋Список пользователей(Excel)',
                 callback_data='user_list'
-            )
-        ]
-    ]
-)
-
-
-admins_settings_keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text='➕Добавить админа',
-                callback_data='admin_add'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='🗑Удалить админа',
-                callback_data='admin_delete'
-            )
-        ],
-        [
-            InlineKeyboardButton(
-                text='🔙В меню',
-                callback_data='toMenu'
             )
         ]
     ]

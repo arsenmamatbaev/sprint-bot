@@ -31,7 +31,6 @@ class Connection:
                        f"level VARCHAR(50) DEFAULT '{Levels.payment_1}',"
                        "payment_link VARCHAR(50),"
                        "payment_date VARCHAR(50) DEFAULT ' ',"
-                       "updated_at VARCHAR(50) DEFAULT ' ',"
                        "register_date VARCHAR(50));")
         await self.__conn.execute(table_users)
         table_settings = ("CREATE TABLE IF NOT EXISTS settings("
@@ -59,7 +58,8 @@ class Connection:
             full_name=user.full_name,
             username=user.username,
             payment_link=ExistUser[0]['payment_link'],
-            level=ExistUser[0]['level']
+            level=ExistUser[0]['level'],
+            register_date=ExistUser[0]['register_date']
         )
     
     async def create(self,
@@ -109,4 +109,38 @@ class Connection:
                  f"VALUES ({user_id}) "
                  f"ON CONFLICT (user_id) DO UPDATE SET user_id = {user_id};")
         await self.__conn.execute(query)
+
+    @property
+    async def getUsers(self) -> List[DataUser]:
+        query = "SELECT * FROM users;"
+        users = []
+        usersRecords = await self.__conn.fetch(query=query)
+        for userRecord in usersRecords:
+            users.append(DataUser(
+                userRecord['user_id'],
+                userRecord['full_name'],
+                userRecord['username'],
+                userRecord['payment_link'],
+                userRecord['level'],
+                userRecord['register_date']
+            ))
+        return users
+
+    async def updateLevel(self,
+                          user_id: int):
+        '''
+        Обновляет уровень пользователя в базе данных
+        '''
+        query = f"UPDATE users SET level = '{Levels.learning}' WHERE user_id = {user_id}"
+        await self.__conn.execute(query)
+
+    async def updatePrices(self,
+                           price1: int,
+                           price2: int) -> None:
+        '''
+        Обновляет цены в базу данных
+        '''
+        query = f"UPDATE settings SET price1 = {price1}, price2 = {price2};"
+        await self.__conn.execute(query)
+        
 

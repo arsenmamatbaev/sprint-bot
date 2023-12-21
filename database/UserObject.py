@@ -12,6 +12,7 @@ class User:
 class DataUser(User):
     payment_link: str
     level: str
+    register_date: str
 
 
 @dataclass
